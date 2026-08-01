@@ -1,0 +1,143 @@
+.search {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 56px 32px 72px;
+  flex: 1;
+}
+
+.search__header {
+  max-width: 780px;
+}
+
+.search__eyebrow {
+  margin: 0 0 12px;
+  color: var(--color-primary);
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.search__title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 42px;
+  line-height: 1.12;
+  font-weight: 700;
+}
+
+.search__description {
+  max-width: 680px;
+  margin: 20px 0 0;
+  color: var(--color-muted);
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.search__panel {
+  margin-top: 36px;
+  padding: 24px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-surface);
+}
+
+.search__form {
+  width: 100%;
+}
+
+.search__label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--color-text);
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+.search__form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.search__input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.search__input::placeholder {
+  color: #9ca3af;
+}
+
+.search__input:focus {
+  outline: 2px solid #93c5fd;
+  border-color: var(--color-primary);
+}
+
+.search__button {
+  min-width: 140px;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--color-surface);
+  background-color: var(--color-primary);
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.search__button:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.search__results {
+  margin-top: 32px;
+}
+
+.search__empty {
+  margin: 0;
+  padding: 32px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  color: #64748b;
+  background-color: var(--color-surface);
+  text-align: center;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+@media screen and (max-width: 640px) {
+  .search {
+    padding: 40px 20px 56px;
+  }
+
+  .search__title {
+    font-size: 32px;
+  }
+
+  .search__description {
+    font-size: 16px;
+  }
+
+  .search__panel {
+    padding: 20px;
+  }
+
+  .search__form-row {
+    flex-direction: column;
+  }
+
+  .search__button {
+    width: 100%;
+  }
+}
