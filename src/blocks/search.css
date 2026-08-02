@@ -225,6 +225,11 @@
   font-size: 15px;
   line-height: 1.5;
 }
+.search__empty_error {
+  color: var(--color-danger);
+  border-color: #fecaca;
+  background-color: #fef2f2;
+}
 .search__icon-button {
   width: 38px;
   height: 38px;

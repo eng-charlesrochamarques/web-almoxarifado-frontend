@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Popup from "../Popup/Popup.jsx";
-
+import Preloader from "../Preloader/Preloader.jsx";
+import { searchSupplierItems } from "../../utils/supplierApi";
 const stockItems = [
   {
     id: "stock-ne555",
@@ -17,26 +18,15 @@ const stockItems = [
   },
 ];
 
-const distributorResults = [
-  {
-    id: "tme-ne555",
-    imageUrl: "",
-    supplier: "TME",
-    manufacturer: "Texas Instruments",
-    manufacturerPartNumber: "NE555P",
-    description: "Timer IC, single, DIP-8",
-    availability: 1240,
-    unitPrice: 0.32,
-    currency: "EUR",
-  },
-];
-
 function Search() {
   const [searchQuery, setSearchQuery] = useState("");
   const [hasSearchedDistributor, setHasSearchedDistributor] = useState(false);
   const [isAddPopupOpen, setIsAddPopupOpen] = useState(false);
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
+  const [distributorResults, setDistributorResults] = useState([]);
+  const [isLoadingDistributor, setIsLoadingDistributor] = useState(false);
+  const [distributorError, setDistributorError] = useState("");
 
   const visibleStockItems = stockItems.filter((item) => {
     if (!normalizedQuery) return true;
@@ -58,10 +48,27 @@ function Search() {
   function handleSearchQueryChange(event) {
     setSearchQuery(event.target.value);
     setHasSearchedDistributor(false);
+    setDistributorResults([]);
+    setDistributorError("");
   }
 
   function handleSearchDistributor() {
     setHasSearchedDistributor(true);
+    setIsLoadingDistributor(true);
+    setDistributorError("");
+
+    searchSupplierItems(searchQuery)
+      .then((items) => {
+        setDistributorResults(items);
+      })
+      .catch(() => {
+        setDistributorError(
+          "Desculpe, algo deu errado durante a solicitacao. Pode haver um problema de conexao ou o servidor pode estar inativo. Por favor, tente novamente mais tarde.",
+        );
+      })
+      .finally(() => {
+        setIsLoadingDistributor(false);
+      });
   }
 
   function handleOpenAddPopup() {
@@ -217,59 +224,71 @@ function Search() {
               para adicionar um novo item ao almoxarifado.
             </p>
           )}
+          {isLoadingDistributor && <Preloader />}
 
-          {hasSearchedDistributor && hasDistributorResults && (
-            <div className="search__table-wrapper">
-              <table className="search__table">
-                <thead>
-                  <tr>
-                    <th>Imagem</th>
-                    <th>Fornecedor</th>
-                    <th>Part number</th>
-                    <th>Fabricante</th>
-                    <th>Descricao</th>
-                    <th>Disponivel</th>
-                    <th>Preco</th>
-                    <th>Acao</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {distributorResults.map((item) => (
-                    <tr key={item.id}>
-                      <td>
-                        <div className="search__image-placeholder">CI</div>
-                      </td>
-                      <td>{item.supplier}</td>
-                      <td>{item.manufacturerPartNumber}</td>
-                      <td>{item.manufacturer}</td>
-                      <td>{item.description}</td>
-                      <td>{item.availability}</td>
-                      <td>
-                        {item.currency} {item.unitPrice.toFixed(2)}
-                      </td>
-                      <td>
-                        <button
-                          className="search__icon-button"
-                          type="button"
-                          aria-label="Adicionar ao almoxarifado"
-                          title="Adicionar ao almoxarifado"
-                          onClick={handleOpenAddPopup}
-                        >
-                          +
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {hasSearchedDistributor && !hasDistributorResults && (
-            <p className="search__empty">
-              Nenhum resultado encontrado no distribuidor.
+          {distributorError && (
+            <p className="search__empty search__empty_error">
+              {distributorError}
             </p>
           )}
+          {hasSearchedDistributor &&
+            !isLoadingDistributor &&
+            !distributorError &&
+            hasDistributorResults && (
+              <div className="search__table-wrapper">
+                <table className="search__table">
+                  <thead>
+                    <tr>
+                      <th>Imagem</th>
+                      <th>Fornecedor</th>
+                      <th>Part number</th>
+                      <th>Fabricante</th>
+                      <th>Descricao</th>
+                      <th>Disponivel</th>
+                      <th>Preco</th>
+                      <th>Acao</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {distributorResults.map((item) => (
+                      <tr key={item.id}>
+                        <td>
+                          <div className="search__image-placeholder">CI</div>
+                        </td>
+                        <td>{item.supplier}</td>
+                        <td>{item.manufacturerPartNumber}</td>
+                        <td>{item.manufacturer}</td>
+                        <td>{item.description}</td>
+                        <td>{item.availability}</td>
+                        <td>
+                          {item.currency} {item.unitPrice.toFixed(2)}
+                        </td>
+                        <td>
+                          <button
+                            className="search__icon-button"
+                            type="button"
+                            aria-label="Adicionar ao almoxarifado"
+                            title="Adicionar ao almoxarifado"
+                            onClick={handleOpenAddPopup}
+                          >
+                            +
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+          {hasSearchedDistributor &&
+            !isLoadingDistributor &&
+            !distributorError &&
+            !hasDistributorResults && (
+              <p className="search__empty">
+                Nenhum resultado encontrado no distribuidor.
+              </p>
+            )}
         </section>
       )}
 
