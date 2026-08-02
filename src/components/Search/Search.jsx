@@ -2,6 +2,7 @@ import { useState } from "react";
 import Popup from "../Popup/Popup.jsx";
 import Preloader from "../Preloader/Preloader.jsx";
 import { searchSupplierItems } from "../../utils/supplierApi";
+
 const stockItems = [
   {
     id: "stock-ne555",
@@ -22,11 +23,11 @@ function Search() {
   const [searchQuery, setSearchQuery] = useState("");
   const [hasSearchedDistributor, setHasSearchedDistributor] = useState(false);
   const [isAddPopupOpen, setIsAddPopupOpen] = useState(false);
-
-  const normalizedQuery = searchQuery.trim().toLowerCase();
   const [distributorResults, setDistributorResults] = useState([]);
   const [isLoadingDistributor, setIsLoadingDistributor] = useState(false);
   const [distributorError, setDistributorError] = useState("");
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
 
   const visibleStockItems = stockItems.filter((item) => {
     if (!normalizedQuery) return true;
@@ -93,8 +94,8 @@ function Search() {
         </p>
       </section>
 
-      <section className="search__panel" aria-label="Formulario de pesquisa">
-        <form className="search__form">
+      <section className="search__panel" aria-label="Pesquisa no almoxarifado">
+        <div className="search__form">
           <div className="search__field">
             <label className="search__label" htmlFor="search-query">
               Item, fabricante ou part number
@@ -109,7 +110,7 @@ function Search() {
               onChange={handleSearchQueryChange}
             />
           </div>
-        </form>
+        </div>
       </section>
 
       <section className="search__section" aria-label="Itens do almoxarifado">
@@ -224,6 +225,7 @@ function Search() {
               para adicionar um novo item ao almoxarifado.
             </p>
           )}
+
           {isLoadingDistributor && <Preloader />}
 
           {distributorError && (
@@ -231,6 +233,7 @@ function Search() {
               {distributorError}
             </p>
           )}
+
           {hasSearchedDistributor &&
             !isLoadingDistributor &&
             !distributorError &&
