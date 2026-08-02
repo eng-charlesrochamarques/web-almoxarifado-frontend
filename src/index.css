@@ -5,7 +5,7 @@
 @import url("./blocks/main.css");
 @import url("./blocks/search.css");
 @import url("./blocks/preloader.css");
-
+@import url("./blocks/popup.css");
 * {
   box-sizing: border-box;
 }

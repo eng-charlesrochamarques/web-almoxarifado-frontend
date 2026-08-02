@@ -44,10 +44,7 @@
 }
 
 .search__form {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 16px;
-  align-items: end;
+  display: block;
 }
 
 .search__field {
@@ -269,6 +266,15 @@
 .search__icon-button_danger:hover {
   background-color: #b91c1c;
 }
+.search__popup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.search__popup-form .search__button {
+  margin-top: 8px;
+}
 
 @media screen and (max-width: 760px) {
   .search {
@@ -277,10 +283,6 @@
 
   .search__title {
     font-size: 30px;
-  }
-
-  .search__form {
-    grid-template-columns: 1fr;
   }
 
   .search__button {
