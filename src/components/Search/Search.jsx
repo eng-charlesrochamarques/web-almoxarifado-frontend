@@ -18,6 +18,8 @@ const stockItems = [
     currency: "EUR",
   },
 ];
+const INITIAL_VISIBLE_RESULTS = 3;
+const RESULTS_STEP = 3;
 
 function Search() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,7 +28,9 @@ function Search() {
   const [distributorResults, setDistributorResults] = useState([]);
   const [isLoadingDistributor, setIsLoadingDistributor] = useState(false);
   const [distributorError, setDistributorError] = useState("");
-
+  const [visibleDistributorCount, setVisibleDistributorCount] = useState(
+    INITIAL_VISIBLE_RESULTS,
+  );
   const normalizedQuery = searchQuery.trim().toLowerCase();
 
   const visibleStockItems = stockItems.filter((item) => {
@@ -43,6 +47,12 @@ function Search() {
 
   const hasVisibleStockItems = visibleStockItems.length > 0;
   const hasDistributorResults = distributorResults.length > 0;
+  const visibleDistributorResults = distributorResults.slice(
+    0,
+    visibleDistributorCount,
+  );
+  const shouldShowMoreButton =
+    visibleDistributorCount < distributorResults.length;
   const canSearchDistributor =
     Boolean(normalizedQuery) && !hasVisibleStockItems;
 
@@ -51,13 +61,14 @@ function Search() {
     setHasSearchedDistributor(false);
     setDistributorResults([]);
     setDistributorError("");
+    setVisibleDistributorCount(INITIAL_VISIBLE_RESULTS);
   }
 
   function handleSearchDistributor() {
     setHasSearchedDistributor(true);
     setIsLoadingDistributor(true);
     setDistributorError("");
-
+    setVisibleDistributorCount(INITIAL_VISIBLE_RESULTS);
     searchSupplierItems(searchQuery)
       .then((items) => {
         setDistributorResults(items);
@@ -71,7 +82,9 @@ function Search() {
         setIsLoadingDistributor(false);
       });
   }
-
+  function handleShowMoreDistributorResults() {
+    setVisibleDistributorCount((currentCount) => currentCount + RESULTS_STEP);
+  }
   function handleOpenAddPopup() {
     setIsAddPopupOpen(true);
   }
@@ -233,55 +246,66 @@ function Search() {
               {distributorError}
             </p>
           )}
-
           {hasSearchedDistributor &&
             !isLoadingDistributor &&
             !distributorError &&
             hasDistributorResults && (
-              <div className="search__table-wrapper">
-                <table className="search__table">
-                  <thead>
-                    <tr>
-                      <th>Imagem</th>
-                      <th>Fornecedor</th>
-                      <th>Part number</th>
-                      <th>Fabricante</th>
-                      <th>Descricao</th>
-                      <th>Disponivel</th>
-                      <th>Preco</th>
-                      <th>Acao</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {distributorResults.map((item) => (
-                      <tr key={item.id}>
-                        <td>
-                          <div className="search__image-placeholder">CI</div>
-                        </td>
-                        <td>{item.supplier}</td>
-                        <td>{item.manufacturerPartNumber}</td>
-                        <td>{item.manufacturer}</td>
-                        <td>{item.description}</td>
-                        <td>{item.availability}</td>
-                        <td>
-                          {item.currency} {item.unitPrice.toFixed(2)}
-                        </td>
-                        <td>
-                          <button
-                            className="search__icon-button"
-                            type="button"
-                            aria-label="Adicionar ao almoxarifado"
-                            title="Adicionar ao almoxarifado"
-                            onClick={handleOpenAddPopup}
-                          >
-                            +
-                          </button>
-                        </td>
+              <>
+                <div className="search__table-wrapper">
+                  <table className="search__table">
+                    <thead>
+                      <tr>
+                        <th>Imagem</th>
+                        <th>Fornecedor</th>
+                        <th>Part number</th>
+                        <th>Fabricante</th>
+                        <th>Descricao</th>
+                        <th>Disponivel</th>
+                        <th>Preco</th>
+                        <th>Acao</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {visibleDistributorResults.map((item) => (
+                        <tr key={item.id}>
+                          <td>
+                            <div className="search__image-placeholder">CI</div>
+                          </td>
+                          <td>{item.supplier}</td>
+                          <td>{item.manufacturerPartNumber}</td>
+                          <td>{item.manufacturer}</td>
+                          <td>{item.description}</td>
+                          <td>{item.availability}</td>
+                          <td>
+                            {item.currency} {item.unitPrice.toFixed(2)}
+                          </td>
+                          <td>
+                            <button
+                              className="search__icon-button"
+                              type="button"
+                              aria-label="Adicionar ao almoxarifado"
+                              title="Adicionar ao almoxarifado"
+                              onClick={handleOpenAddPopup}
+                            >
+                              +
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {shouldShowMoreButton && (
+                  <button
+                    className="search__show-more"
+                    type="button"
+                    onClick={handleShowMoreDistributorResults}
+                  >
+                    Mostrar mais
+                  </button>
+                )}
+              </>
             )}
 
           {hasSearchedDistributor &&
