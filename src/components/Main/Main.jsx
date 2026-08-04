@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import homeVisual from "../../images/home-visual.png";
 
 function Main() {
   return (
@@ -7,13 +8,21 @@ function Main() {
         <div className="main__content">
           <p className="main__eyebrow">Gestao online de almoxarifado</p>
           <h1 className="main__title">
-            Controle itens e atualize dados de fornecedores em um so lugar.
+            Controle itens e atualize dados de fornecedores em um so lugar
           </h1>
           <p className="main__description">
             O Web Almoxarifado ajuda a cadastrar, pesquisar e acompanhar itens
             do estoque, com suporte para consulta de preco e disponibilidade em
             distribuidores externos.
           </p>
+        </div>
+
+        <div className="main__visual">
+          <img
+            className="main__image"
+            src={homeVisual}
+            alt="Ilustracao abstrata de controle de almoxarifado online"
+          />
           <Link className="main__button" to="/search">
             Pesquisar itens
           </Link>
