@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Popup from "../Popup/Popup.jsx";
 import Preloader from "../Preloader/Preloader.jsx";
 import { searchSupplierItems } from "../../utils/supplierApi";
@@ -20,12 +20,30 @@ const stockItems = [
 ];
 const INITIAL_VISIBLE_RESULTS = 3;
 const RESULTS_STEP = 3;
-
+const STORAGE_KEYS = {
+  searchQuery: "webAlmoxarifadoSearchQuery",
+  distributorResults: "webAlmoxarifadoDistributorResults",
+  hasSearchedDistributor: "webAlmoxarifadoHasSearchedDistributor",
+};
 function Search() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [hasSearchedDistributor, setHasSearchedDistributor] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(() => {
+    return localStorage.getItem(STORAGE_KEYS.searchQuery) || "";
+  });
+  const [hasSearchedDistributor, setHasSearchedDistributor] = useState(() => {
+    return localStorage.getItem(STORAGE_KEYS.hasSearchedDistributor) === "true";
+  });
   const [isAddPopupOpen, setIsAddPopupOpen] = useState(false);
-  const [distributorResults, setDistributorResults] = useState([]);
+  const [distributorResults, setDistributorResults] = useState(() => {
+    const savedResults = localStorage.getItem(STORAGE_KEYS.distributorResults);
+
+    if (!savedResults) return [];
+
+    try {
+      return JSON.parse(savedResults);
+    } catch {
+      return [];
+    }
+  });
   const [isLoadingDistributor, setIsLoadingDistributor] = useState(false);
   const [distributorError, setDistributorError] = useState("");
   const [visibleDistributorCount, setVisibleDistributorCount] = useState(
@@ -55,7 +73,23 @@ function Search() {
     visibleDistributorCount < distributorResults.length;
   const canSearchDistributor =
     Boolean(normalizedQuery) && !hasVisibleStockItems;
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.searchQuery, searchQuery);
+  }, [searchQuery]);
 
+  useEffect(() => {
+    localStorage.setItem(
+      STORAGE_KEYS.hasSearchedDistributor,
+      String(hasSearchedDistributor),
+    );
+  }, [hasSearchedDistributor]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      STORAGE_KEYS.distributorResults,
+      JSON.stringify(distributorResults),
+    );
+  }, [distributorResults]);
   function handleSearchQueryChange(event) {
     setSearchQuery(event.target.value);
     setHasSearchedDistributor(false);
