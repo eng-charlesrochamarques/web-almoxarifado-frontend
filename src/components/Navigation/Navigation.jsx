@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 
-function Navigation() {
+function Navigation({ isLoggedIn, onSignOut }) {
   return (
     <nav className="navigation" aria-label="Navegacao principal">
       <div className="navigation__links">
@@ -23,15 +23,27 @@ function Navigation() {
       </div>
 
       <div className="navigation__auth" aria-label="Acesso do usuario">
-        <button className="navigation__auth-button" type="button">
-          Entrar
-        </button>
-        <button
-          className="navigation__auth-button navigation__auth-button_register"
-          type="button"
-        >
-          Registrar
-        </button>
+        {isLoggedIn ? (
+          <button
+            className="navigation__auth-button"
+            type="button"
+            onClick={onSignOut}
+          >
+            Sair
+          </button>
+        ) : (
+          <>
+            <button className="navigation__auth-button" type="button">
+              Entrar
+            </button>
+            <button
+              className="navigation__auth-button navigation__auth-button_register"
+              type="button"
+            >
+              Registrar
+            </button>
+          </>
+        )}
       </div>
     </nav>
   );
