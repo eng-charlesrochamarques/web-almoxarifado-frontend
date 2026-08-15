@@ -8,6 +8,7 @@ import Main from "./Main/Main.jsx";
 import Search from "./Search/Search.jsx";
 import Footer from "./Footer/Footer.jsx";
 import AuthPopup from "./AuthPopup/AuthPopup.jsx";
+import ProtectedRoute from "./ProtectedRoute/ProtectedRoute.jsx";
 
 const TOKEN_KEY = "webAlmoxarifadoToken";
 
@@ -83,7 +84,17 @@ function App() {
         />
         <Routes>
           <Route path="/" element={<Main />} />
-          <Route path="/search" element={<Search token={token} />} />
+          <Route
+            path="/search"
+            element={
+              <ProtectedRoute
+                isLoggedIn={isLoggedIn}
+                onUnauthorized={handleOpenLoginPopup}
+              >
+                <Search token={token} />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
 
         <AuthPopup
