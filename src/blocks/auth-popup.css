@@ -1,0 +1,44 @@
+.auth-popup__form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-popup__label {
+  color: #111827;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.auth-popup__input {
+  width: 100%;
+  min-height: 46px;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0 14px;
+  color: #111827;
+  font-size: 16px;
+}
+
+.auth-popup__input:focus {
+  border-color: #2451de;
+  outline: none;
+}
+
+.auth-popup__submit {
+  min-height: 48px;
+  border: 0;
+  border-radius: 8px;
+  margin-top: 8px;
+  padding: 0 18px;
+  background-color: #2451de;
+  color: #fff;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.auth-popup__submit:hover {
+  background-color: #1d43bd;
+}

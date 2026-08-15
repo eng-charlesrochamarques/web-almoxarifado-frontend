@@ -1,6 +1,6 @@
 import Navigation from "../Navigation/Navigation.jsx";
 
-function Header({ isLoggedIn, onSignOut }) {
+function Header({ isLoggedIn, onSignOut, onLoginClick, onRegisterClick }) {
   return (
     <header className="header">
       <div className="header__brand" aria-label="Web Almoxarifado">
@@ -10,7 +10,12 @@ function Header({ isLoggedIn, onSignOut }) {
         </span>
         <span className="header__name">Web Almoxarifado</span>
       </div>
-      <Navigation isLoggedIn={isLoggedIn} onSignOut={onSignOut} />
+      <Navigation
+        isLoggedIn={isLoggedIn}
+        onSignOut={onSignOut}
+        onLoginClick={onLoginClick}
+        onRegisterClick={onRegisterClick}
+      />
     </header>
   );
 }
