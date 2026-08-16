@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Popup from "../Popup/Popup.jsx";
+
 import Preloader from "../Preloader/Preloader.jsx";
 import {
   createItem,
@@ -8,6 +8,12 @@ import {
   searchTmeItems,
   updateItem,
 } from "../../utils/api.js";
+import SearchForm from "./SearchForm.jsx";
+import StockTable from "./StockTable.jsx";
+import SupplierTable from "./SupplierTable.jsx";
+import DeleteItemPopup from "./DeleteItemPopup.jsx";
+import AddItemPopup from "./AddItemPopup.jsx";
+import EditItemPopup from "./EditItemPopup.jsx";
 
 const INITIAL_VISIBLE_RESULTS = 3;
 const RESULTS_STEP = 3;
@@ -260,24 +266,10 @@ function Search({ token }) {
         </p>
       </section>
 
-      <section className="search__panel" aria-label="Pesquisa no almoxarifado">
-        <div className="search__form">
-          <div className="search__field">
-            <label className="search__label" htmlFor="search-query">
-              Item, fabricante ou part number
-            </label>
-            <input
-              className="search__input"
-              id="search-query"
-              name="query"
-              type="text"
-              placeholder="Ex: NE555, LM358, resistor 10k"
-              value={searchQuery}
-              onChange={handleSearchQueryChange}
-            />
-          </div>
-        </div>
-      </section>
+      <SearchForm
+        searchQuery={searchQuery}
+        onSearchQueryChange={handleSearchQueryChange}
+      />
 
       <section className="search__section" aria-label="Itens do almoxarifado">
         <div className="search__section-header">
@@ -297,84 +289,11 @@ function Search({ token }) {
           <p className="search__empty search__empty_error">{stockError}</p>
         )}
         {!stockError && hasVisibleStockItems ? (
-          <div className="search__table-wrapper">
-            <table className="search__table">
-              <thead>
-                <tr>
-                  <th>Imagem</th>
-                  <th>Item</th>
-                  <th>Part number</th>
-                  <th>Fabricante</th>
-                  <th>Localizacao</th>
-                  <th>Qtd.</th>
-                  <th>Min.</th>
-                  <th>Ultimo preco</th>
-                  <th>Acoes</th>
-                </tr>
-              </thead>
-              <tbody>
-                {visibleStockItems.map((item) => (
-                  <tr key={item._id}>
-                    <td>
-                      {item.imageUrl ? (
-                        <img
-                          className="search__item-image"
-                          src={item.imageUrl}
-                          alt={item.name}
-                        />
-                      ) : (
-                        <div className="search__image-placeholder">CI</div>
-                      )}
-                    </td>
-                    <td>
-                      <span className="search__item-name">{item.name}</span>
-                      <span className="search__item-category">
-                        {item.category}
-                      </span>
-                    </td>
-                    <td>{item.partNumber}</td>
-                    <td>{item.manufacturer}</td>
-                    <td>{item.location}</td>
-                    <td>{item.quantity}</td>
-                    <td>{item.minQuantity}</td>
-                    <td>
-                      {item.currency} {Number(item.lastPrice).toFixed(2)}
-                    </td>
-                    <td>
-                      <div className="search__actions">
-                        <button
-                          className="search__icon-button"
-                          type="button"
-                          aria-label="Atualizar preco"
-                          title="Atualizar preco"
-                        >
-                          R
-                        </button>
-                        <button
-                          className="search__icon-button search__icon-button_secondary"
-                          type="button"
-                          aria-label="Editar item"
-                          title="Editar item"
-                          onClick={() => handleOpenEditPopup(item)}
-                        >
-                          E
-                        </button>
-                        <button
-                          className="search__icon-button search__icon-button_danger"
-                          type="button"
-                          aria-label="Excluir item"
-                          title="Excluir item"
-                          onClick={() => handleOpenDeletePopup(item)}
-                        >
-                          X
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <StockTable
+            items={visibleStockItems}
+            onEditItem={handleOpenEditPopup}
+            onDeleteItem={handleOpenDeletePopup}
+          />
         ) : (
           <p className="search__empty">
             Nenhum item encontrado no almoxarifado.
@@ -417,50 +336,10 @@ function Search({ token }) {
             !distributorError &&
             hasDistributorResults && (
               <>
-                <div className="search__table-wrapper">
-                  <table className="search__table">
-                    <thead>
-                      <tr>
-                        <th>Imagem</th>
-                        <th>Fornecedor</th>
-                        <th>Part number</th>
-                        <th>Fabricante</th>
-                        <th>Descricao</th>
-                        <th>Disponivel</th>
-                        <th>Preco</th>
-                        <th>Acao</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {visibleDistributorResults.map((item) => (
-                        <tr key={item.id}>
-                          <td>
-                            <div className="search__image-placeholder">CI</div>
-                          </td>
-                          <td>{item.supplier}</td>
-                          <td>{item.manufacturerPartNumber}</td>
-                          <td>{item.manufacturer}</td>
-                          <td>{item.description}</td>
-                          <td>{item.availability}</td>
-                          <td>
-                            {item.currency} {item.unitPrice.toFixed(2)}
-                          </td>
-                          <td>
-                            <button
-                              className="search__icon-button"
-                              type="button"
-                              aria-label="Adicionar ao almoxarifado"
-                              title="Adicionar ao almoxarifado"
-                              onClick={() => handleOpenAddPopup(item)}
-                            >
-                              +
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <SupplierTable
+                  items={visibleDistributorResults}
+                  onAddItem={handleOpenAddPopup}
+                />
 
                 {shouldShowMoreButton && (
                   <button
@@ -485,152 +364,24 @@ function Search({ token }) {
         </section>
       )}
 
-      <Popup
+      <AddItemPopup
         isOpen={isAddPopupOpen}
-        title="Adicionar ao almoxarifado"
         onClose={handleClosePopup}
-      >
-        <form className="search__popup-form" onSubmit={handleAddItemSubmit}>
-          <label className="search__label" htmlFor="item-location">
-            Localizacao
-          </label>
-          <input
-            className="search__input"
-            id="item-location"
-            name="location"
-            type="text"
-            placeholder="Ex: Gaveta A-03"
-            required
-          />
+        onSubmit={handleAddItemSubmit}
+      />
 
-          <label className="search__label" htmlFor="item-quantity">
-            Quantidade em estoque
-          </label>
-          <input
-            className="search__input"
-            id="item-quantity"
-            name="quantity"
-            type="number"
-            min="0"
-            defaultValue="1"
-            required
-          />
-
-          <label className="search__label" htmlFor="item-minimum">
-            Quantidade minima
-          </label>
-          <input
-            className="search__input"
-            id="item-minimum"
-            name="minQuantity"
-            type="number"
-            min="0"
-            defaultValue="1"
-            required
-          />
-
-          <button className="search__button" type="submit">
-            Salvar item
-          </button>
-        </form>
-      </Popup>
-
-      <Popup
+      <DeleteItemPopup
         isOpen={isDeletePopupOpen}
-        title="Excluir item"
         onClose={handleCloseDeletePopup}
-      >
-        <div className="search__popup-form">
-          <p className="search__empty">
-            Tem certeza que deseja excluir este item do almoxarifado?
-          </p>
-          <button
-            className="search__button search__button_danger"
-            type="button"
-            onClick={handleDeleteItem}
-          >
-            Excluir item
-          </button>
-        </div>
-      </Popup>
+        onDeleteItem={handleDeleteItem}
+      />
 
-      <Popup
+      <EditItemPopup
         isOpen={isEditPopupOpen}
-        title="Editar item"
+        item={itemToEdit}
         onClose={handleCloseEditPopup}
-      >
-        {itemToEdit && (
-          <form className="search__popup-form" onSubmit={handleEditItemSubmit}>
-            <label className="search__label" htmlFor="edit-location">
-              Localizacao
-            </label>
-            <input
-              className="search__input"
-              id="edit-location"
-              name="location"
-              type="text"
-              defaultValue={itemToEdit.location}
-              required
-            />
-
-            <label className="search__label" htmlFor="edit-quantity">
-              Quantidade em estoque
-            </label>
-            <input
-              className="search__input"
-              id="edit-quantity"
-              name="quantity"
-              type="number"
-              min="0"
-              defaultValue={itemToEdit.quantity}
-              required
-            />
-
-            <label className="search__label" htmlFor="edit-minimum">
-              Quantidade minima
-            </label>
-            <input
-              className="search__input"
-              id="edit-minimum"
-              name="minQuantity"
-              type="number"
-              min="0"
-              defaultValue={itemToEdit.minQuantity}
-              required
-            />
-
-            <label className="search__label" htmlFor="edit-price">
-              Ultimo preco
-            </label>
-            <input
-              className="search__input"
-              id="edit-price"
-              name="lastPrice"
-              type="number"
-              min="0"
-              step="0.0001"
-              defaultValue={itemToEdit.lastPrice}
-              required
-            />
-
-            <label className="search__label" htmlFor="edit-image-url">
-              URL da imagem
-            </label>
-            <input
-              className="search__input"
-              id="edit-image-url"
-              name="imageUrl"
-              type="url"
-              placeholder="https://..."
-              defaultValue={itemToEdit.imageUrl}
-            />
-
-            <button className="search__button" type="submit">
-              Salvar alteracoes
-            </button>
-          </form>
-        )}
-      </Popup>
+        onSubmit={handleEditItemSubmit}
+      />
     </main>
   );
 }
