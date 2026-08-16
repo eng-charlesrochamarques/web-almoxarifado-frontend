@@ -46,6 +46,14 @@ O front-end se comunica com a API propria do projeto:
 http://localhost:3000
 ```
 
+Em desenvolvimento local, essa URL pode ser configurada em um arquivo `.env`:
+
+```env
+VITE_API_BASE_URL=http://localhost:3000
+```
+
+No deploy, essa variavel deve apontar para o dominio publico da API.
+
 Rotas utilizadas pelo front-end:
 
 ```text
