@@ -1,23 +1,8 @@
 import { useEffect, useState } from "react";
 import Popup from "../Popup/Popup.jsx";
 import Preloader from "../Preloader/Preloader.jsx";
-import { searchSupplierItems } from "../../utils/supplierApi";
+import { createItem, getItems, searchTmeItems } from "../../utils/api.js";
 
-const stockItems = [
-  {
-    id: "stock-ne555",
-    imageUrl: "",
-    name: "Timer NE555",
-    manufacturer: "Texas Instruments",
-    manufacturerPartNumber: "NE555P",
-    category: "Circuitos integrados",
-    location: "Gaveta A-03",
-    quantityInStock: 25,
-    minimumQuantity: 10,
-    lastUnitPrice: 0.32,
-    currency: "EUR",
-  },
-];
 const INITIAL_VISIBLE_RESULTS = 3;
 const RESULTS_STEP = 3;
 const STORAGE_KEYS = {
@@ -25,10 +10,30 @@ const STORAGE_KEYS = {
   distributorResults: "webAlmoxarifadoDistributorResults",
   hasSearchedDistributor: "webAlmoxarifadoHasSearchedDistributor",
 };
-function Search() {
+function Search({ token }) {
+  const [stockItems, setStockItems] = useState([]);
+
+  const [stockError, setStockError] = useState("");
+  const [selectedDistributorItem, setSelectedDistributorItem] = useState(null);
   const [searchQuery, setSearchQuery] = useState(() => {
     return localStorage.getItem(STORAGE_KEYS.searchQuery) || "";
   });
+
+  useEffect(() => {
+    if (!token) {
+      return;
+    }
+
+    getItems(token)
+      .then((items) => {
+        setStockItems(items);
+        setStockError("");
+      })
+      .catch(() => {
+        setStockError("Nao foi possivel carregar os itens do almoxarifado.");
+      });
+  }, [token]);
+
   const [hasSearchedDistributor, setHasSearchedDistributor] = useState(() => {
     return localStorage.getItem(STORAGE_KEYS.hasSearchedDistributor) === "true";
   });
@@ -57,7 +62,7 @@ function Search() {
     return [
       item.name,
       item.manufacturer,
-      item.manufacturerPartNumber,
+      item.partNumber,
       item.category,
       item.location,
     ].some((value) => value.toLowerCase().includes(normalizedQuery));
@@ -103,7 +108,7 @@ function Search() {
     setIsLoadingDistributor(true);
     setDistributorError("");
     setVisibleDistributorCount(INITIAL_VISIBLE_RESULTS);
-    searchSupplierItems(searchQuery)
+    searchTmeItems(token, searchQuery)
       .then((items) => {
         setDistributorResults(items);
       })
@@ -119,12 +124,51 @@ function Search() {
   function handleShowMoreDistributorResults() {
     setVisibleDistributorCount((currentCount) => currentCount + RESULTS_STEP);
   }
-  function handleOpenAddPopup() {
+  function handleOpenAddPopup(item) {
+    setSelectedDistributorItem(item);
     setIsAddPopupOpen(true);
   }
 
   function handleClosePopup() {
     setIsAddPopupOpen(false);
+    setSelectedDistributorItem(null);
+  }
+
+  function handleAddItemSubmit(event) {
+    event.preventDefault();
+
+    if (!selectedDistributorItem) {
+      return;
+    }
+
+    const formData = new FormData(event.target);
+
+    createItem(token, {
+      name:
+        selectedDistributorItem.description ||
+        selectedDistributorItem.manufacturerPartNumber,
+      category: "Componentes eletronicos",
+      partNumber: selectedDistributorItem.manufacturerPartNumber,
+      manufacturer: selectedDistributorItem.manufacturer,
+      location: formData.get("location"),
+      quantity: Number(formData.get("quantity")),
+      minQuantity: Number(formData.get("minQuantity")),
+      lastPrice: Number(selectedDistributorItem.unitPrice) || 0,
+      currency: selectedDistributorItem.currency || "EUR",
+      imageUrl: selectedDistributorItem.imageUrl || "",
+    })
+      .then((newItem) => {
+        setStockItems((currentItems) => [newItem, ...currentItems]);
+        handleClosePopup();
+        setSearchQuery("");
+        setDistributorResults([]);
+        setHasSearchedDistributor(false);
+      })
+      .catch(() => {
+        setDistributorError(
+          "Nao foi possivel adicionar o item ao almoxarifado.",
+        );
+      });
   }
 
   return (
@@ -174,7 +218,10 @@ function Search() {
           </p>
         </div>
 
-        {hasVisibleStockItems ? (
+        {stockError && (
+          <p className="search__empty search__empty_error">{stockError}</p>
+        )}
+        {!stockError && hasVisibleStockItems ? (
           <div className="search__table-wrapper">
             <table className="search__table">
               <thead>
@@ -192,7 +239,7 @@ function Search() {
               </thead>
               <tbody>
                 {visibleStockItems.map((item) => (
-                  <tr key={item.id}>
+                  <tr key={item._id}>
                     <td>
                       <div className="search__image-placeholder">CI</div>
                     </td>
@@ -202,13 +249,13 @@ function Search() {
                         {item.category}
                       </span>
                     </td>
-                    <td>{item.manufacturerPartNumber}</td>
+                    <td>{item.partNumber}</td>
                     <td>{item.manufacturer}</td>
                     <td>{item.location}</td>
-                    <td>{item.quantityInStock}</td>
-                    <td>{item.minimumQuantity}</td>
+                    <td>{item.quantity}</td>
+                    <td>{item.minQuantity}</td>
                     <td>
-                      {item.currency} {item.lastUnitPrice.toFixed(2)}
+                      {item.currency} {Number(item.lastPrice).toFixed(2)}
                     </td>
                     <td>
                       <div className="search__actions">
@@ -319,7 +366,7 @@ function Search() {
                               type="button"
                               aria-label="Adicionar ao almoxarifado"
                               title="Adicionar ao almoxarifado"
-                              onClick={handleOpenAddPopup}
+                              onClick={() => handleOpenAddPopup(item)}
                             >
                               +
                             </button>
@@ -358,7 +405,7 @@ function Search() {
         title="Adicionar ao almoxarifado"
         onClose={handleClosePopup}
       >
-        <form className="search__popup-form">
+        <form className="search__popup-form" onSubmit={handleAddItemSubmit}>
           <label className="search__label" htmlFor="item-location">
             Localizacao
           </label>
@@ -377,7 +424,7 @@ function Search() {
           <input
             className="search__input"
             id="item-quantity"
-            name="quantityInStock"
+            name="quantity"
             type="number"
             min="0"
             defaultValue="1"
@@ -390,7 +437,7 @@ function Search() {
           <input
             className="search__input"
             id="item-minimum"
-            name="minimumQuantity"
+            name="minQuantity"
             type="number"
             min="0"
             defaultValue="1"
