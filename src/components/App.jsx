@@ -19,6 +19,7 @@ function App() {
   const [activeAuthPopup, setActiveAuthPopup] = useState(null);
   const [authError, setAuthError] = useState("");
   const [authSuccessMessage, setAuthSuccessMessage] = useState("");
+  const isAuthChecking = Boolean(token) && !currentUser;
 
   useEffect(() => {
     if (!token) {
@@ -103,6 +104,7 @@ function App() {
             element={
               <ProtectedRoute
                 isLoggedIn={isLoggedIn}
+                isAuthChecking={isAuthChecking}
                 onUnauthorized={handleOpenLoginPopup}
               >
                 <Search token={token} />
