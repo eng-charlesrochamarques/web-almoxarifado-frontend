@@ -318,6 +318,14 @@
     width: 100%;
   }
 
+  .search__button_danger {
+    background-color: var(--color-danger);
+  }
+
+  .search__button_danger:hover {
+    background-color: #b91c1c;
+  }
+
   .search__section-header {
     flex-direction: column;
     align-items: flex-start;

@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import Popup from "../Popup/Popup.jsx";
 import Preloader from "../Preloader/Preloader.jsx";
-import { createItem, getItems, searchTmeItems } from "../../utils/api.js";
+import {
+  createItem,
+  deleteItem,
+  getItems,
+  searchTmeItems,
+} from "../../utils/api.js";
 
 const INITIAL_VISIBLE_RESULTS = 3;
 const RESULTS_STEP = 3;
@@ -15,6 +20,9 @@ function Search({ token }) {
 
   const [stockError, setStockError] = useState("");
   const [selectedDistributorItem, setSelectedDistributorItem] = useState(null);
+  const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
+  const [selectedStockItem, setSelectedStockItem] = useState(null);
+
   const [searchQuery, setSearchQuery] = useState(() => {
     return localStorage.getItem(STORAGE_KEYS.searchQuery) || "";
   });
@@ -171,6 +179,33 @@ function Search({ token }) {
       });
   }
 
+  function handleOpenDeletePopup(item) {
+    setSelectedStockItem(item);
+    setIsDeletePopupOpen(true);
+  }
+
+  function handleCloseDeletePopup() {
+    setSelectedStockItem(null);
+    setIsDeletePopupOpen(false);
+  }
+
+  function handleDeleteItem() {
+    if (!selectedStockItem) {
+      return;
+    }
+
+    deleteItem(token, selectedStockItem._id)
+      .then(() => {
+        setStockItems((currentItems) =>
+          currentItems.filter((item) => item._id !== selectedStockItem._id),
+        );
+        handleCloseDeletePopup();
+      })
+      .catch(() => {
+        setStockError("Nao foi possivel excluir o item.");
+      });
+  }
+
   return (
     <main className="search">
       <section className="search__header">
@@ -280,6 +315,7 @@ function Search({ token }) {
                           type="button"
                           aria-label="Excluir item"
                           title="Excluir item"
+                          onClick={() => handleOpenDeletePopup(item)}
                         >
                           X
                         </button>
@@ -448,6 +484,25 @@ function Search({ token }) {
             Salvar item
           </button>
         </form>
+      </Popup>
+
+      <Popup
+        isOpen={isDeletePopupOpen}
+        title="Excluir item"
+        onClose={handleCloseDeletePopup}
+      >
+        <div className="search__popup-form">
+          <p className="search__empty">
+            Tem certeza que deseja excluir este item do almoxarifado?
+          </p>
+          <button
+            className="search__button search__button_danger"
+            type="button"
+            onClick={handleDeleteItem}
+          >
+            Excluir item
+          </button>
+        </div>
       </Popup>
     </main>
   );
