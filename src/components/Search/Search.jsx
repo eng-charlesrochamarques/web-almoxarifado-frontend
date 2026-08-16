@@ -6,6 +6,7 @@ import {
   deleteItem,
   getItems,
   searchTmeItems,
+  updateItem,
 } from "../../utils/api.js";
 
 const INITIAL_VISIBLE_RESULTS = 3;
@@ -22,7 +23,8 @@ function Search({ token }) {
   const [selectedDistributorItem, setSelectedDistributorItem] = useState(null);
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [selectedStockItem, setSelectedStockItem] = useState(null);
-
+  const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
+  const [itemToEdit, setItemToEdit] = useState(null);
   const [searchQuery, setSearchQuery] = useState(() => {
     return localStorage.getItem(STORAGE_KEYS.searchQuery) || "";
   });
@@ -206,6 +208,44 @@ function Search({ token }) {
       });
   }
 
+  function handleOpenEditPopup(item) {
+    setItemToEdit(item);
+    setIsEditPopupOpen(true);
+  }
+
+  function handleCloseEditPopup() {
+    setItemToEdit(null);
+    setIsEditPopupOpen(false);
+  }
+
+  function handleEditItemSubmit(event) {
+    event.preventDefault();
+
+    if (!itemToEdit) {
+      return;
+    }
+
+    const formData = new FormData(event.target);
+
+    updateItem(token, itemToEdit._id, {
+      location: formData.get("location"),
+      quantity: Number(formData.get("quantity")),
+      minQuantity: Number(formData.get("minQuantity")),
+      lastPrice: Number(formData.get("lastPrice")),
+      imageUrl: formData.get("imageUrl"),
+    })
+      .then((updatedItem) => {
+        setStockItems((currentItems) =>
+          currentItems.map((item) =>
+            item._id === updatedItem._id ? updatedItem : item,
+          ),
+        );
+        handleCloseEditPopup();
+      })
+      .catch(() => {
+        setStockError("Nao foi possivel editar o item.");
+      });
+  }
   return (
     <main className="search">
       <section className="search__header">
@@ -276,7 +316,15 @@ function Search({ token }) {
                 {visibleStockItems.map((item) => (
                   <tr key={item._id}>
                     <td>
-                      <div className="search__image-placeholder">CI</div>
+                      {item.imageUrl ? (
+                        <img
+                          className="search__item-image"
+                          src={item.imageUrl}
+                          alt={item.name}
+                        />
+                      ) : (
+                        <div className="search__image-placeholder">CI</div>
+                      )}
                     </td>
                     <td>
                       <span className="search__item-name">{item.name}</span>
@@ -307,6 +355,7 @@ function Search({ token }) {
                           type="button"
                           aria-label="Editar item"
                           title="Editar item"
+                          onClick={() => handleOpenEditPopup(item)}
                         >
                           E
                         </button>
@@ -503,6 +552,84 @@ function Search({ token }) {
             Excluir item
           </button>
         </div>
+      </Popup>
+
+      <Popup
+        isOpen={isEditPopupOpen}
+        title="Editar item"
+        onClose={handleCloseEditPopup}
+      >
+        {itemToEdit && (
+          <form className="search__popup-form" onSubmit={handleEditItemSubmit}>
+            <label className="search__label" htmlFor="edit-location">
+              Localizacao
+            </label>
+            <input
+              className="search__input"
+              id="edit-location"
+              name="location"
+              type="text"
+              defaultValue={itemToEdit.location}
+              required
+            />
+
+            <label className="search__label" htmlFor="edit-quantity">
+              Quantidade em estoque
+            </label>
+            <input
+              className="search__input"
+              id="edit-quantity"
+              name="quantity"
+              type="number"
+              min="0"
+              defaultValue={itemToEdit.quantity}
+              required
+            />
+
+            <label className="search__label" htmlFor="edit-minimum">
+              Quantidade minima
+            </label>
+            <input
+              className="search__input"
+              id="edit-minimum"
+              name="minQuantity"
+              type="number"
+              min="0"
+              defaultValue={itemToEdit.minQuantity}
+              required
+            />
+
+            <label className="search__label" htmlFor="edit-price">
+              Ultimo preco
+            </label>
+            <input
+              className="search__input"
+              id="edit-price"
+              name="lastPrice"
+              type="number"
+              min="0"
+              step="0.0001"
+              defaultValue={itemToEdit.lastPrice}
+              required
+            />
+
+            <label className="search__label" htmlFor="edit-image-url">
+              URL da imagem
+            </label>
+            <input
+              className="search__input"
+              id="edit-image-url"
+              name="imageUrl"
+              type="url"
+              placeholder="https://..."
+              defaultValue={itemToEdit.imageUrl}
+            />
+
+            <button className="search__button" type="submit">
+              Salvar alteracoes
+            </button>
+          </form>
+        )}
       </Popup>
     </main>
   );
