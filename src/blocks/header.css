@@ -46,12 +46,33 @@
 @media screen and (max-width: 640px) {
   .header {
     padding: 20px;
-    flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
+    gap: 12px;
+    align-items: center;
   }
 
   .header__name {
     font-size: 20px;
+  }
+}
+
+@media screen and (max-width: 420px) {
+  .header {
+    padding: 18px;
+  }
+
+  .header__brand {
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .header__mark {
+    min-width: 52px;
+    min-height: 34px;
+    padding: 0 8px;
+    font-size: 14px;
+  }
+
+  .header__name {
+    font-size: 18px;
   }
 }
