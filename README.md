@@ -1,27 +1,29 @@
-﻿# Web Almoxarifado
+# Web Almoxarifado
 
-## Descrição do projeto
+## Descricao do projeto
 
-Web Almoxarifado é uma aplicação front-end em React para pesquisa e gestão inicial de itens de almoxarifado. Nesta primeira fase, o aplicativo permite pesquisar itens cadastrados localmente, consultar dados em uma API externa pública e visualizar resultados de fornecedores em uma interface preparada para evoluir para um sistema full-stack.
+Web Almoxarifado e uma aplicacao full-stack para gestao de itens de almoxarifado. O sistema permite cadastrar usuarios, autenticar acesso, consultar itens internos, adicionar novos componentes ao estoque, editar dados cadastrados, excluir itens e atualizar precos por meio de consulta a distribuidor externo.
 
-O projeto foi desenvolvido para a Fase 1 do projeto final da TripleTen: marcação, JSX e conexão com uma API de terceiros.
+O projeto foi desenvolvido como projeto final da TripleTen, integrando front-end em React, back-end em Node.js/Express, banco de dados MongoDB e API externa da TME.
 
 ## Funcionalidades
 
-- Página inicial com apresentação do sistema.
-- Navegação entre as páginas Início e Pesquisar.
-- Botões visuais de Entrar e Registrar, preparados para a etapa de autenticação.
-- Pesquisa automática nos itens cadastrados no almoxarifado.
-- Consulta a uma API externa quando o item não é encontrado internamente.
-- Exibição de resultados internos em tabela.
-- Exibição de resultados externos em tabela.
-- Normalização dos dados recebidos da API externa.
-- Preloader durante a consulta ao fornecedor.
-- Tratamento de erros de requisição.
-- Estado de nenhum resultado encontrado.
-- Botão Mostrar mais para carregar mais resultados externos.
-- Popup reutilizável para confirmação e simulação de adição de item ao almoxarifado.
-- Persistência da última busca externa com localStorage.
+- Cadastro de usuario.
+- Login e logout com JWT.
+- Persistencia do token no `localStorage`.
+- Validacao instantanea dos formularios de login e cadastro.
+- Rota protegida para acesso a pagina de pesquisa.
+- Contexto global `CurrentUserContext` para armazenar o usuario atual.
+- Listagem dos itens cadastrados no almoxarifado.
+- Pesquisa automatica por nome, fabricante, categoria, localizacao ou part number.
+- Consulta a distribuidor externo quando o item nao existe no almoxarifado.
+- Adicao de item externo ao almoxarifado.
+- Edicao de localizacao, quantidade, quantidade minima, preco e imagem do item.
+- Exclusao de item com popup de confirmacao.
+- Atualizacao de preco por consulta a API da TME via back-end.
+- Popup de feedback para sucesso ou erro na atualizacao de preco.
+- Preloader durante consultas externas.
+- Tratamento de erros de requisicao.
 - Layout responsivo para desktop, tablet e celular.
 
 ## Tecnologias utilizadas
@@ -30,44 +32,40 @@ O projeto foi desenvolvido para a Fase 1 do projeto final da TripleTen: marcaç�
 - Vite
 - JavaScript
 - React Router
+- Context API
 - CSS com metodologia BEM
 - Fetch API
 - localStorage
 - ESLint
 
-## API externa
+## Back-end
 
-Nesta fase, a integração ativa usa uma API pública para demonstrar o fluxo de consulta externa sem expor credenciais no front-end.
-
-API utilizada:
+O front-end se comunica com a API propria do projeto:
 
 ```text
-https://dummyjson.com/products/search
+http://localhost:3000
 ```
 
-Exemplos de termos para teste:
-
-- phone
-- laptop
-- watch
-- perfume
-- shirt
-
-O projeto também possui uma estrutura preparada para futura integração com a TME em `src/utils/tmeSupplierApi.js`. Essa integração não é chamada diretamente pelo navegador porque a API da TME exige token e segredo de aplicação.
-
-Na próxima fase, a integração correta será feita pelo back-end, seguindo o fluxo:
+Rotas utilizadas pelo front-end:
 
 ```text
-React -> Back-end próprio -> API da TME -> Back-end normaliza os dados -> React exibe os resultados
+POST /signup
+POST /signin
+GET /users/me
+GET /items
+POST /items
+PATCH /items/:itemId
+DELETE /items/:itemId
+GET /api/suppliers/tme/search?query=...
 ```
 
-## Segurança
-
-Nenhuma chave, token ou segredo é armazenado no front-end ou publicado no GitHub. As credenciais reais da TME serão mantidas em variáveis de ambiente no back-end durante as próximas fases do projeto.
+A integracao com a TME e feita pelo back-end para proteger token e segredo da API. Nenhuma credencial sensivel e armazenada no front-end.
 
 ## Como executar localmente
 
-Clone o repositório e instale as dependências:
+Antes de iniciar o front-end, execute tambem o back-end e mantenha o MongoDB ativo.
+
+Instale as dependencias:
 
 ```bash
 npm install
@@ -79,20 +77,20 @@ Execute o projeto em modo de desenvolvimento:
 npm run dev
 ```
 
-Se o PowerShell bloquear scripts no Windows, use os comandos com `npm.cmd`:
+Se o PowerShell bloquear scripts no Windows, use:
 
 ```powershell
 npm.cmd install
 npm.cmd run dev
 ```
 
-Endereço local padrão:
+Endereco local padrao:
 
 ```text
 http://localhost:5173/
 ```
 
-## Scripts disponíveis
+## Scripts disponiveis
 
 ```bash
 npm run dev
@@ -101,45 +99,56 @@ npm run lint
 npm run preview
 ```
 
-## Implantação
-
-Como este projeto continuará como uma aplicação full-stack nas próximas fases, a implantação do front-end será feita posteriormente junto com o back-end, conforme orientação da TripleTen.
-
-Link do deploy:
+## Estrutura principal
 
 ```text
-A ser adicionado nas próximas fases.
+src/
+  blocks/
+  components/
+  contexts/
+  images/
+  utils/
 ```
 
-## Status da Fase 1
-
-Branch de desenvolvimento:
+Arquivos importantes:
 
 ```text
-stage-react-api
+src/utils/api.js
+src/contexts/CurrentUserContext.jsx
+src/components/ProtectedRoute/ProtectedRoute.jsx
+src/components/AuthPopup/AuthPopup.jsx
+src/components/Search/Search.jsx
 ```
 
-Pull request:
+## Seguranca
+
+- O token JWT e salvo no `localStorage`.
+- Rotas privadas exigem autenticacao.
+- As credenciais da TME ficam apenas no back-end, em variaveis de ambiente.
+- O arquivo `.env` nao deve ser enviado ao GitHub.
+
+## Deploy
+
+O deploy full-stack sera realizado com front-end e back-end acessiveis por dominio, conforme orientacao da TripleTen para a etapa final.
+
+Link do front-end:
 
 ```text
-A ser aberta de stage-react-api para main.
+A ser adicionado apos o deploy.
 ```
 
-## Próximas fases
+Link da API:
 
-Na Fase 2, o projeto deve evoluir para incluir:
+```text
+A ser adicionado apos o deploy.
+```
 
-- Back-end com Node.js e Express.
-- Banco de dados MongoDB.
-- Modelos de usuário e itens do almoxarifado.
-- CRUD real de itens conectado ao banco de dados.
-- Integração protegida com a API da TME.
-- Variáveis de ambiente para credenciais sensíveis.
+## Branch da etapa final
 
-Na Fase 3, o projeto deve incluir:
+```text
+stage-final
+```
 
-- Cadastro de usuário.
-- Login de usuário.
-- Rotas protegidas.
-- Autenticação com JWT.
-- Controle de sessão no front-end.
+## Status
+
+Projeto em desenvolvimento para a Etapa Final do projeto full-stack da TripleTen.
