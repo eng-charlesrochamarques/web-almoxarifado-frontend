@@ -1,4 +1,4 @@
-function StockTable({ items, onEditItem, onDeleteItem }) {
+function StockTable({ items, onUpdatePrice, onEditItem, onDeleteItem }) {
   return (
     <div className="search__table-wrapper">
       <table className="search__table">
@@ -48,6 +48,7 @@ function StockTable({ items, onEditItem, onDeleteItem }) {
                     type="button"
                     aria-label="Atualizar preco"
                     title="Atualizar preco"
+                    onClick={() => onUpdatePrice(item)}
                   >
                     R
                   </button>

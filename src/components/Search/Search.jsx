@@ -14,6 +14,7 @@ import SupplierTable from "./SupplierTable.jsx";
 import DeleteItemPopup from "./DeleteItemPopup.jsx";
 import AddItemPopup from "./AddItemPopup.jsx";
 import EditItemPopup from "./EditItemPopup.jsx";
+import InfoPopup from "./InfoPopup.jsx";
 
 const INITIAL_VISIBLE_RESULTS = 3;
 const RESULTS_STEP = 3;
@@ -26,6 +27,11 @@ function Search({ token }) {
   const [stockItems, setStockItems] = useState([]);
 
   const [stockError, setStockError] = useState("");
+  const [infoPopup, setInfoPopup] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+  });
   const [selectedDistributorItem, setSelectedDistributorItem] = useState(null);
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [selectedStockItem, setSelectedStockItem] = useState(null);
@@ -252,6 +258,66 @@ function Search({ token }) {
         setStockError("Nao foi possivel editar o item.");
       });
   }
+  function handleUpdateItemPrice(itemToUpdate) {
+    setStockError("");
+
+    searchTmeItems(token, itemToUpdate.partNumber)
+      .then((supplierItems) => {
+        const supplierItem = supplierItems[0];
+
+        if (!supplierItem) {
+          setInfoPopup({
+            isOpen: true,
+            title: "Preco nao encontrado",
+            message:
+              "Nenhum preco foi encontrado para este item no distribuidor.",
+          });
+
+          return null;
+        }
+
+        return updateItem(token, itemToUpdate._id, {
+          location: itemToUpdate.location,
+          quantity: itemToUpdate.quantity,
+          minQuantity: itemToUpdate.minQuantity,
+          lastPrice: Number(supplierItem.unitPrice) || itemToUpdate.lastPrice,
+          currency: supplierItem.currency || itemToUpdate.currency,
+          imageUrl: itemToUpdate.imageUrl || supplierItem.imageUrl || "",
+        });
+      })
+      .then((updatedItem) => {
+        if (!updatedItem) {
+          return;
+        }
+
+        setStockItems((currentItems) =>
+          currentItems.map((item) =>
+            item._id === updatedItem._id ? updatedItem : item,
+          ),
+        );
+
+        setInfoPopup({
+          isOpen: true,
+          title: "Preco atualizado",
+          message: `O item ${updatedItem.name} foi atualizado com o preco mais recente encontrado no distribuidor.`,
+        });
+      })
+      .catch(() => {
+        setInfoPopup({
+          isOpen: true,
+          title: "Erro ao atualizar",
+          message: "Nao foi possivel atualizar o preco do item.",
+        });
+      });
+  }
+  function handleCloseInfoPopup() {
+    setInfoPopup({
+      isOpen: false,
+      title: "",
+      message: "",
+    });
+  }
+
   return (
     <main className="search">
       <section className="search__header">
@@ -291,6 +357,7 @@ function Search({ token }) {
         {!stockError && hasVisibleStockItems ? (
           <StockTable
             items={visibleStockItems}
+            onUpdatePrice={handleUpdateItemPrice}
             onEditItem={handleOpenEditPopup}
             onDeleteItem={handleOpenDeletePopup}
           />
@@ -381,6 +448,12 @@ function Search({ token }) {
         item={itemToEdit}
         onClose={handleCloseEditPopup}
         onSubmit={handleEditItemSubmit}
+      />
+      <InfoPopup
+        isOpen={infoPopup.isOpen}
+        title={infoPopup.title}
+        message={infoPopup.message}
+        onClose={handleCloseInfoPopup}
       />
     </main>
   );

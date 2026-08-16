@@ -17,6 +17,8 @@ function App() {
   const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY));
   const isLoggedIn = Boolean(currentUser);
   const [activeAuthPopup, setActiveAuthPopup] = useState(null);
+  const [authError, setAuthError] = useState("");
+  const [authSuccessMessage, setAuthSuccessMessage] = useState("");
 
   useEffect(() => {
     if (!token) {
@@ -41,18 +43,26 @@ function App() {
   }
 
   function handleOpenLoginPopup() {
+    setAuthError("");
+    setAuthSuccessMessage("");
     setActiveAuthPopup("login");
   }
 
   function handleOpenRegisterPopup() {
+    setAuthError("");
+    setAuthSuccessMessage("");
     setActiveAuthPopup("register");
   }
 
   function handleClosePopup() {
     setActiveAuthPopup(null);
+    setAuthError("");
+    setAuthSuccessMessage("");
   }
 
   function handleLoginSubmit(data) {
+    setAuthError("");
+
     login(data)
       .then(({ token: newToken }) => {
         localStorage.setItem(TOKEN_KEY, newToken);
@@ -60,17 +70,21 @@ function App() {
         handleClosePopup();
       })
       .catch((err) => {
-        console.error(err.message);
+        setAuthError(err.message);
       });
   }
-
   function handleRegisterSubmit(data) {
+    setAuthError("");
+
     register(data)
       .then(() => {
+        setAuthSuccessMessage(
+          "Cadastro realizado com sucesso. Agora entre na sua conta.",
+        );
         setActiveAuthPopup("login");
       })
       .catch((err) => {
-        console.error(err.message);
+        setAuthError(err.message);
       });
   }
   return (
@@ -102,8 +116,11 @@ function App() {
           title="Entrar"
           submitText="Entrar"
           mode="login"
+          serverError={authError}
+          successMessage={authSuccessMessage}
           onClose={handleClosePopup}
           onSubmit={handleLoginSubmit}
+          onSwitchMode={handleOpenRegisterPopup}
         />
 
         <AuthPopup
@@ -111,8 +128,11 @@ function App() {
           title="Registrar"
           submitText="Registrar"
           mode="register"
+          serverError={authError}
+          successMessage=""
           onClose={handleClosePopup}
           onSubmit={handleRegisterSubmit}
+          onSwitchMode={handleOpenLoginPopup}
         />
 
         <Footer />
