@@ -137,18 +137,18 @@ src/components/Search/Search.jsx
 
 ## Deploy
 
-O deploy full-stack sera realizado com front-end e back-end acessiveis por dominio, conforme orientacao da TripleTen para a etapa final.
+O deploy full-stack foi realizado com front-end e back-end acessiveis por dominio com HTTPS, conforme orientacao da TripleTen para a etapa final.
 
 Link do front-end:
 
 ```text
-A ser adicionado apos o deploy.
+https://web-almoxarifado.mooo.com
 ```
 
 Link da API:
 
 ```text
-A ser adicionado apos o deploy.
+https://api.web-almoxarifado.mooo.com
 ```
 
 ## Branch da etapa final
@@ -159,4 +159,4 @@ stage-final
 
 ## Status
 
-Projeto em desenvolvimento para a Etapa Final do projeto full-stack da TripleTen.
+Projeto desenvolvido para a Etapa Final do projeto full-stack da TripleTen.
