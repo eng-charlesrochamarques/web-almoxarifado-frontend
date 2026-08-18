@@ -6,6 +6,8 @@
 @import url("./blocks/search.css");
 @import url("./blocks/preloader.css");
 @import url("./blocks/popup.css");
+@import url("./blocks/auth-popup.css");
+
 * {
   box-sizing: border-box;
 }
