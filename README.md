@@ -1,124 +1,95 @@
-# Web Almoxarifado
+# Web Almoxarifado — Frontend
 
-## Descricao do projeto
+Frontend for **Web Almoxarifado**, a full-stack inventory management application created as the final project of the **TripleTen Web Development program**.
 
-Web Almoxarifado e uma aplicacao full-stack para gestao de itens de almoxarifado. O sistema permite cadastrar usuarios, autenticar acesso, consultar itens internos, adicionar novos componentes ao estoque, editar dados cadastrados, excluir itens e atualizar precos por meio de consulta a distribuidor externo.
+The application is designed around a practical engineering use case: managing electronic components in an internal stock system and searching an external distributor when an item is not available locally.
 
-O projeto foi desenvolvido como projeto final da TripleTen, integrando front-end em React, back-end em Node.js/Express, banco de dados MongoDB e API externa da TME.
+## Why this project matters
 
-## Funcionalidades
+This project combines frontend engineering with a real operational problem from electronics environments. It demonstrates how I connect software development with engineering workflows rather than treating the application as an isolated UI exercise.
 
-- Cadastro de usuario.
-- Login e logout com JWT.
-- Persistencia do token no `localStorage`.
-- Validacao instantanea dos formularios de login e cadastro.
-- Rota protegida para acesso a pagina de pesquisa.
-- Contexto global `CurrentUserContext` para armazenar o usuario atual.
-- Listagem dos itens cadastrados no almoxarifado.
-- Pesquisa automatica por nome, fabricante, categoria, localizacao ou part number.
-- Consulta a distribuidor externo quando o item nao existe no almoxarifado.
-- Adicao de item externo ao almoxarifado.
-- Edicao de localizacao, quantidade, quantidade minima, preco e imagem do item.
-- Exclusao de item com popup de confirmacao.
-- Atualizacao de preco por consulta a API da TME via back-end.
-- Popup de feedback para sucesso ou erro na atualizacao de preco.
-- Preloader durante consultas externas.
-- Tratamento de erros de requisicao.
-- Layout responsivo para desktop, tablet e celular.
+Key areas covered:
 
-## Tecnologias utilizadas
+- React component architecture
+- Authentication and protected routes
+- REST API integration
+- State and user context management
+- Form validation
+- Inventory search and CRUD workflows
+- External supplier search through the backend
+- Responsive UI behavior
+- Loading and error states
+
+## Architecture
+
+```text
+React + Vite Frontend
+        |
+        | REST / JSON
+        v
+Node.js + Express Backend
+        |
+        +----> MongoDB
+        |
+        +----> TME Supplier API
+```
+
+Supplier credentials remain on the backend and are never exposed to the browser.
+
+## Tech Stack
 
 - React
 - Vite
-- JavaScript
+- JavaScript (ES6+)
 - React Router
 - Context API
-- CSS com metodologia BEM
 - Fetch API
+- CSS / BEM methodology
 - localStorage
 - ESLint
 
-## Back-end
+## Main Features
 
-O front-end se comunica com a API propria do projeto:
+- User signup and login
+- JWT persistence in `localStorage`
+- Protected application routes
+- Current user state via `CurrentUserContext`
+- Inventory item listing
+- Search by name, manufacturer, category, location or part number
+- Automatic supplier search when no internal item is found
+- Add external supplier item to internal inventory
+- Edit location, quantity, minimum stock, price and image
+- Delete items with confirmation flow
+- Refresh item pricing through the backend integration
+- Success/error feedback popups
+- Loading indicators during external requests
+- Responsive layout for desktop, tablet and mobile
+
+## Main API Calls
 
 ```text
-http://localhost:3000
-```
-
-Em desenvolvimento local, essa URL pode ser configurada em um arquivo `.env`:
-
-```env
-VITE_API_BASE_URL=http://localhost:3000
-```
-
-No deploy, essa variavel deve apontar para o dominio publico da API.
-
-Rotas utilizadas pelo front-end:
-
-```text
-POST /signup
-POST /signin
-GET /users/me
-GET /items
-POST /items
-PATCH /items/:itemId
+POST   /signup
+POST   /signin
+GET    /users/me
+GET    /items
+POST   /items
+PATCH  /items/:itemId
 DELETE /items/:itemId
-GET /api/suppliers/tme/search?query=...
+GET    /api/suppliers/tme/search?query=...
 ```
 
-A integracao com a TME e feita pelo back-end para proteger token e segredo da API. Nenhuma credencial sensivel e armazenada no front-end.
-
-## Como executar localmente
-
-Antes de iniciar o front-end, execute tambem o back-end e mantenha o MongoDB ativo.
-
-Instale as dependencias:
-
-```bash
-npm install
-```
-
-Execute o projeto em modo de desenvolvimento:
-
-```bash
-npm run dev
-```
-
-Se o PowerShell bloquear scripts no Windows, use:
-
-```powershell
-npm.cmd install
-npm.cmd run dev
-```
-
-Endereco local padrao:
-
-```text
-http://localhost:5173/
-```
-
-## Scripts disponiveis
-
-```bash
-npm run dev
-npm run build
-npm run lint
-npm run preview
-```
-
-## Estrutura principal
+## Project Structure
 
 ```text
 src/
-  blocks/
-  components/
-  contexts/
-  images/
-  utils/
+├── blocks/
+├── components/
+├── contexts/
+├── images/
+└── utils/
 ```
 
-Arquivos importantes:
+Important files include:
 
 ```text
 src/utils/api.js
@@ -128,35 +99,69 @@ src/components/AuthPopup/AuthPopup.jsx
 src/components/Search/Search.jsx
 ```
 
-## Seguranca
+## Security Considerations
 
-- O token JWT e salvo no `localStorage`.
-- Rotas privadas exigem autenticacao.
-- As credenciais da TME ficam apenas no back-end, em variaveis de ambiente.
-- O arquivo `.env` nao deve ser enviado ao GitHub.
+- JWT is stored client-side only for authenticated access
+- Protected pages require a valid session
+- TME API credentials are kept on the backend
+- `.env` files are not committed to GitHub
 
-## Deploy
+## Running Locally
 
-O deploy full-stack foi realizado com front-end e back-end acessiveis por dominio com HTTPS, conforme orientacao da TripleTen para a etapa final.
+The backend and MongoDB should be running before starting the frontend.
 
-Link do front-end:
+```bash
+npm install
+npm run dev
+```
+
+Default Vite address:
+
+```text
+http://localhost:5173/
+```
+
+Environment example:
+
+```env
+VITE_API_BASE_URL=http://localhost:3000
+```
+
+## Available Scripts
+
+```bash
+npm run dev
+npm run build
+npm run lint
+npm run preview
+```
+
+## Deployment
+
+Frontend:
 
 ```text
 https://web-almoxarifado.mooo.com
 ```
 
-Link da API:
+API:
 
 ```text
 https://api.web-almoxarifado.mooo.com
 ```
 
-## Branch da etapa final
+> Availability of the training deployment may depend on the hosting environment.
 
-```text
-stage-final
-```
+## What I practiced
 
-## Status
+The project strengthened my understanding of how frontend state, authentication, asynchronous requests, API contracts and UX states work together in a real full-stack workflow.
 
-Projeto desenvolvido para a Etapa Final do projeto full-stack da TripleTen.
+Because the domain is electronics inventory, the application also reflects my professional background in electronics development and production, where component identification, stock control and supplier data are practical engineering problems.
+
+## Author
+
+**Charles Rocha Marques**  
+Electrical/Electronics Engineer expanding into Software & Embedded Development
+
+- GitHub: https://github.com/eng-charlesrochamarques
+- LinkedIn: https://www.linkedin.com/in/charles-rocha-marques/
